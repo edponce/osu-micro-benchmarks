@@ -29,10 +29,11 @@ MPI_Aint disp_local;
 static float a[DIM][DIM], x[DIM], y[DIM];
 
 /* Validation multiplier constants*/
-#define FLOAT_VALIDATION_MULTIPLIER (float)2.0
-#define INT_VALIDATION_MULTIPLIER   (int)10
-#define CHAR_VALIDATION_MULTIPLIER  (char)7
-#define CHAR_RANGE                  (int)pow(2, __CHAR_BIT__)
+#define DOUBLE_VALIDATION_MULTIPLIER (double)2.0
+#define FLOAT_VALIDATION_MULTIPLIER  (float)2.0
+#define INT_VALIDATION_MULTIPLIER    (int)10
+#define CHAR_VALIDATION_MULTIPLIER   (char)7
+#define CHAR_RANGE                   (int)pow(2, __CHAR_BIT__)
 
 #ifdef _ENABLE_CUDA_
 CUcontext cuContext;
@@ -990,6 +991,9 @@ void omb_populate_mpi_type_list(MPI_Datatype *mpi_type_list)
             case OMB_FLOAT:
                 mpi_type_list[i] = MPI_FLOAT;
                 break;
+            case OMB_DOUBLE:
+                mpi_type_list[i] = MPI_DOUBLE;
+                break;
             default:
                 OMB_ERROR_EXIT("Unknown data type");
                 break;
@@ -1384,6 +1388,8 @@ void omb_assign_to_type(void *buf, int pos, int val, MPI_Datatype dtype)
         ((int *)buf)[pos] = (int)val * INT_VALIDATION_MULTIPLIER;
     } else if (MPI_FLOAT == dtype) {
         ((float *)buf)[pos] = (float)val * FLOAT_VALIDATION_MULTIPLIER;
+    } else if (MPI_DOUBLE == dtype) {
+        ((double *)buf)[pos] = (double)val * DOUBLE_VALIDATION_MULTIPLIER;
     } else {
         OMB_ERROR_EXIT("Invalid data type passed");
     }
@@ -1393,6 +1399,8 @@ int omb_get_num_elements(size_t size, MPI_Datatype dtype)
 {
     if (MPI_CHAR == dtype) {
         return size / sizeof(ATOM_CTYPE_FOR_DMPI_CHAR);
+    } else if (MPI_DOUBLE == dtype) {
+        return size / sizeof(ATOM_CTYPE_FOR_DMPI_DOUBLE);
     } else if (MPI_FLOAT == dtype) {
         return size / sizeof(ATOM_CTYPE_FOR_DMPI_FLOAT);
     } else if (MPI_INT == dtype) {
@@ -2064,6 +2072,18 @@ int omb_validate_neighborhood_col(MPI_Comm comm, char *buffer, int indegree,
                     (float)expected_value * FLOAT_VALIDATION_MULTIPLIER) {
                     errors = 1;
                 }
+            } else if (MPI_DOUBLE == dtype) {
+                ((double *)log_buffer)[i] =
+                    ((double *)
+                         temp_r_buf)[l * omb_get_num_elements(size, dtype) + s];
+                ((double *)expected_buffer)[i] =
+                    (double)expected_value * DOUBLE_VALIDATION_MULTIPLIER;
+                if (((double *)
+                         temp_r_buf)[l * omb_get_num_elements(size, dtype) +
+                                     s] !=
+                    (double)expected_value * DOUBLE_VALIDATION_MULTIPLIER) {
+                    errors = 1;
+                }
             }
             i++;
         }
@@ -2150,6 +2170,14 @@ int validate_reduce_scatter(void *buffer, size_t size, int *recvcounts,
                 (float)val * FLOAT_VALIDATION_MULTIPLIER) {
                 errors = 1;
             }
+        } else if (MPI_DOUBLE == dtype) {
+            ((double *)expected_buffer)[l] =
+                (double)val * DOUBLE_VALIDATION_MULTIPLIER;
+            ((double *)log_buffer)[l] = ((double *)temp_buffer)[i];
+            if (((double *)temp_buffer)[i] !=
+                (double)val * DOUBLE_VALIDATION_MULTIPLIER) {
+                errors = 1;
+            }
         }
     }
     if (1 == errors && options.log_validation) {
@@ -2207,6 +2235,15 @@ int validate_reduction(void *buffer, size_t size, int iter, int num_procs,
         for (i = 0; i < num_elements; i++) {
             j = (i % 100);
             if (abs(((float *)temp_buffer)[i] - ((float *)expected_buffer)[i]) >
+                ERROR_DELTA) {
+                errors = 1;
+                break;
+            }
+        }
+    } else if (dtype == MPI_DOUBLE) {
+        for (i = 0; i < num_elements; i++) {
+            j = (i % 100);
+            if (abs(((double *)temp_buffer)[i] - ((double *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 errors = 1;
                 break;
@@ -2280,6 +2317,15 @@ int validate_collective(void *buffer, size_t size, int value1, int value2,
                 break;
             }
         }
+    } else if (dtype == MPI_DOUBLE) {
+        for (i = 0; i < num_elements; i++) {
+            j = (i % 100);
+            if (abs(((double *)temp_buffer)[i] - ((double *)expected_buffer)[i]) >
+                ERROR_DELTA) {
+                errors = 1;
+                break;
+            }
+        }
     } else {
         if (memcmp(temp_buffer, expected_buffer, size * value2) != 0) {
             errors = 1;
@@ -2314,7 +2360,9 @@ void validation_log(void *buffer, void *expected_buffer, size_t size,
     log_file_fp = fopen(log_file_loc, "a");
     OMB_CHECK_NULL_AND_EXIT(log_file_loc, "Unable to open file.");
     fprintf(log_file_fp, "Size: %d, Iteration:%d, ", size, itr);
-    if (MPI_FLOAT == dtype) {
+    if (MPI_DOUBLE == dtype) {
+        fprintf(log_file_fp, "Datatype: MPI_DOUBLE\n");
+    } else if (MPI_FLOAT == dtype) {
         fprintf(log_file_fp, "Datatype: MPI_FLOAT\n");
     } else if (MPI_INT == dtype) {
         fprintf(log_file_fp, "Datatype: MPI_INT\n");
@@ -2326,7 +2374,16 @@ void validation_log(void *buffer, void *expected_buffer, size_t size,
     fprintf(log_file_fp, "%-*s%*s%*s\n", 10, "Position", FIELD_WIDTH,
             "Expected", FIELD_WIDTH, "Actual");
 
-    if (dtype == MPI_FLOAT) {
+    if (dtype == MPI_DOUBLE) {
+        for (i = 0; i < num_elements; i++) {
+            if (abs(((double *)buffer)[i] - ((double *)expected_buffer)[i]) >
+                ERROR_DELTA) {
+                fprintf(log_file_fp, "%-*d%*f%*f\n", 10, i, FIELD_WIDTH,
+                        ((double *)expected_buffer)[i], FIELD_WIDTH,
+                        ((double *)buffer)[i]);
+            }
+        }
+    } else if (dtype == MPI_FLOAT) {
         for (i = 0; i < num_elements; i++) {
             if (abs(((float *)buffer)[i] - ((float *)expected_buffer)[i]) >
                 ERROR_DELTA) {

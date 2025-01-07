@@ -235,13 +235,15 @@ int omb_neighborhood_create(MPI_Comm comm, int **indegree_ptr,
                             int **outdegree_ptr, int **destinations_ptr,
                             int **destweights_ptr);
 
-#define ATOM_CTYPE_FOR_DMPI_CHAR  char
-#define ATOM_CTYPE_FOR_DMPI_INT   int
-#define ATOM_CTYPE_FOR_DMPI_FLOAT float
+#define ATOM_CTYPE_FOR_DMPI_CHAR   char
+#define ATOM_CTYPE_FOR_DMPI_INT    int
+#define ATOM_CTYPE_FOR_DMPI_FLOAT  float
+#define ATOM_CTYPE_FOR_DMPI_DOUBLE double
 
-#define ENUM_OF_DMPI_CHAR  1
-#define ENUM_OF_DMPI_INT   2
-#define ENUM_OF_DMPI_FLOAT 3
+#define ENUM_OF_DMPI_CHAR   1
+#define ENUM_OF_DMPI_INT    2
+#define ENUM_OF_DMPI_FLOAT  3
+#define ENUM_OF_DMPI_DOUBLE 4
 int omb_get_num_elements(size_t size, MPI_Datatype dtype);
 void omb_assign_to_type(void *buf, int pos, int val, MPI_Datatype dtype);
 int atomic_data_validation_setup(MPI_Datatype datatype, int jrank, void *buf,

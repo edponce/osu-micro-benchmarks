@@ -212,7 +212,7 @@ enum mpi_req { MAX_REQ_NUM = 1000 };
 #define ONESBUFSIZE                     ((MAX_MESSAGE_SIZE * WINDOW_SIZE_LARGE) + MAX_ALIGNMENT)
 #define MESSAGE_ALIGNMENT               64
 #define MESSAGE_ALIGNMENT_MR            (1 << 12)
-#define OMB_NUM_DATATYPES               3
+#define OMB_NUM_DATATYPES               4
 #define OMB_DATATYPE_STR_MAX_LEN        128
 #define OMB_ROOT_ROTATE_VAL             -1
 #define OMB_STAT_MAX_NUM                5
@@ -330,7 +330,7 @@ typedef struct omb_nhbrhd_type_parameters {
 extern char const *win_info[20];
 extern char const *sync_info[20];
 
-enum omb_dtypes_t { OMB_DTYPE_NULL, OMB_CHAR, OMB_INT, OMB_FLOAT };
+enum omb_dtypes_t { OMB_DTYPE_NULL, OMB_CHAR, OMB_INT, OMB_FLOAT, OMB_DOUBLE };
 
 struct options_t {
     enum accel_type accel;

@@ -245,7 +245,7 @@
                   "(default:- cart:1:1)"                                       \
                   "~~-N cart:<num of dimentions:radius>   //Cartesian"         \
                   "~~-N graph:<adjacency graph file>      //Graph"},           \
-            {'T', "[all,mpi_char,mpi_int,mpi_float] - Set MPI_TYPE . "         \
+            {'T', "[all,mpi_char,mpi_int,mpi_float,mpi_double] - Set MPI_TYPE . " \
                   "Default:MPI_CHAR. Reduction defaults: MPI_INT"},            \
             {'I', "Enable session based MPI initialization."},                 \
             {'l', "Run benchmark with MPI_IN_PLACE support."},                 \

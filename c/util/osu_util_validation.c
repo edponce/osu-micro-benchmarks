@@ -105,6 +105,8 @@ char *osc_tostr(void *val)
         sprintf(osc_str_output, "%s", "MPI_INT");
     if (type == MPI_FLOAT)
         sprintf(osc_str_output, "%s", "MPI_FLOAT");
+    if (type == MPI_DOUBLE)
+        sprintf(osc_str_output, "%s", "MPI_DOUBLE");
     return osc_str_output;
 }
 
@@ -116,6 +118,8 @@ int mpi_dtype_enumerate(MPI_Datatype dtype)
         return 2;
     if (dtype == MPI_FLOAT)
         return 3;
+    if (dtype == MPI_DOUBLE)
+        return 4;
     return -1;
 }
 
@@ -250,7 +254,8 @@ int perform_atomic_op(MPI_Datatype dtype, MPI_Op op, void *addr_in, void *buf,
     }
     switch (dtype_enumeration) {
         atomic_int_ops(DMPI_CHAR) atomic_int_ops(DMPI_INT)
-            atomic_real_float_ops(DMPI_FLOAT) default : return -1;
+            atomic_real_float_ops(DMPI_FLOAT)
+            atomic_real_float_ops(DMPI_DOUBLE) default : return -1;
     }
     return 0;
 }
@@ -261,7 +266,8 @@ int perform_atomic_cas(MPI_Datatype dtype, void *addr_in, void *buf,
     int dtype_enumeration = mpi_dtype_enumerate(dtype);
     switch (dtype_enumeration) {
         atomic_case_cas(DMPI_CHAR) atomic_case_cas(DMPI_INT)
-            atomic_case_cas(DMPI_FLOAT) default : return -1;
+            atomic_case_cas(DMPI_FLOAT)
+            atomic_case_cas(DMPI_DOUBLE) default : return -1;
     }
     return 0;
 }
@@ -274,6 +280,8 @@ static int validation_input_value(MPI_Datatype dtype, int jrank, void *val)
         *(int *)val = (1 + jrank) * 10;
     else if (dtype == MPI_FLOAT)
         *(float *)val = (1 + jrank) * 1.11f;
+    else if (dtype == MPI_DOUBLE)
+        *(double *)val = (1 + jrank) * 1.11f;
     else {
         fprintf(stderr,
                 "No initial value defined, cannot perform data validation "
@@ -292,6 +300,8 @@ static int atom_binary_compare(MPI_Datatype dtype, void *a, void *b)
 
     if (dtype == MPI_FLOAT) {
         return COMPARE_AS_TYPE(ATOM_CTYPE_FOR_DMPI_FLOAT, a, b);
+    } else if (dtype == MPI_DOUBLE) {
+        return COMPARE_AS_TYPE(ATOM_CTYPE_FOR_DMPI_DOUBLE, a, b);
     }
 
     err = MPI_Type_size(dtype, &dtype_size);
@@ -387,6 +397,14 @@ static void print_failure_message(MPI_Datatype datatype, void *adr_in,
                                  adr_obs, adr_expect);
         if (res_obs)
             PRINT_RES_COMPARISON(DMPI_FLOAT, "%f", adr_in, buf_in, compare_in,
+                                 res_obs, res_expect);
+    }
+    if (datatype == MPI_DOUBLE) {
+        if (adr_obs)
+            PRINT_ADR_COMPARISON(DMPI_DOUBLE, "%f", adr_in, buf_in, compare_in,
+                                 adr_obs, adr_expect);
+        if (res_obs)
+            PRINT_RES_COMPARISON(DMPI_DOUBLE, "%f", adr_in, buf_in, compare_in,
                                  res_obs, res_expect);
     }
 }
