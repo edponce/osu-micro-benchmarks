@@ -34,6 +34,7 @@
             {"num-test-calls", required_argument, 0, 't'},                     \
             {"iterations", required_argument, 0, 'i'},                         \
             {"warmup", required_argument, 0, 'x'},                             \
+            {"alloc-type", required_argument, 0, 'A'},                         \
             {"array-size", required_argument, 0, 'a'},                         \
             {"sync-option", required_argument, 0, 's'},                        \
             {"win-options", required_argument, 0, 'w'},                        \
@@ -95,7 +96,7 @@
 #define OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "+:d:hvfm:i:x:a:c::u:G:T:Ilz::"
 #define OMBOP__COLLECTIVE__REDUCE            OMBOP__COLLECTIVE__ALL_REDUCE "k:"
 #define OMBOP__ACCEL__COLLECTIVE__REDUCE                                       \
-    OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "k:"
+    OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "A:k:"
 #define OMBOP__COLLECTIVE__REDUCE_SCATTER OMBOP__COLLECTIVE__ALL_REDUCE
 #define OMBOP__ACCEL__COLLECTIVE__REDUCE_SCATTER                               \
     OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE
@@ -190,6 +191,9 @@
             {'i', "ITER - number of iterations for timing (default 10000)"},   \
             {'x', "ITER - set number of warmup"                                \
                   "~~iterations to skip before timing (default 200)"},         \
+            {'A', "ALLOC - set memory allocator for buffers, which can be of " \
+                  "ALLOC 'device' or 'pinned'. "                               \
+                  "~~Default is 'device'."},                                   \
             {'a',                                                              \
              "SIZE - set the size of arrays to be allocated on device (GPU)"   \
              "~~for dummy compute on device (GPU) (default 32). OMB must be "  \
@@ -229,7 +233,7 @@
             {'b',                                                              \
              "Use different buffers to perform data transfer (default single)" \
              "~~Options: single, multiple"},                                   \
-            {'u', "ITR Set number of warmup iterations to skip before timing " \
+            {'u', "ITER Set number of warmup iterations to skip before timing "\
                   "when validation"                                            \
                   "is enabled (default 5)"},                                   \
             {'G', "[tty,png,pdf] - graph output of per iteration values."},    \

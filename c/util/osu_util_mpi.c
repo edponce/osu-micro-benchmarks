@@ -2443,8 +2443,17 @@ int allocate_memory_coll(void **buffer, size_t size, enum accel_type type)
 #endif
 #ifdef _ENABLE_ROCM_
         case ROCM:
-            ROCM_CHECK(hipMalloc(buffer, size));
-            return 0;
+            switch (options.alloc) {
+                case PINNED:
+                    // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                    ROCM_CHECK(hipHostMalloc(buffer, size, hipDeviceScheduleSpin));
+                    return 0;
+                case DEVICE:
+                    ROCM_CHECK(hipMalloc(buffer, size));
+                    return 0;
+                default:
+                    return 1;
+            }
 #endif
 #ifdef _ENABLE_SYCL_
         case SYCL:

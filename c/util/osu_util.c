@@ -107,28 +107,35 @@ void print_header(int rank, int full)
             break;
         case COLLECTIVE:
             if (rank == 0) {
-                fprintf(stdout, HEADER, "");
+                switch (options.alloc) {
+                    case DEVICE:
+                    case PINNED:
+                        fprintf(stdout, "# Memory allocator for Buffer is %s\n",
+                            (DEVICE == options.alloc ? "'DEVICE'" : "'PINNED'"));
+                    default:
+                        fprintf(stdout, HEADER, "");
 
-                if (options.show_size) {
-                    fprintf(stdout, "%-*s", 10, "# Size");
-                    fprintf(stdout, "%*s", FIELD_WIDTH, "Avg Latency(us)");
+                        if (options.show_size) {
+                            fprintf(stdout, "%-*s", 10, "# Size");
+                            fprintf(stdout, "%*s", FIELD_WIDTH, "Avg Latency(us)");
+                        }
+
+                        else {
+                            fprintf(stdout, "# Avg Latency(us)");
+                        }
+
+                        if (full) {
+                            fprintf(stdout, "%*s", FIELD_WIDTH, "Min Latency(us)");
+                            fprintf(stdout, "%*s", FIELD_WIDTH, "Max Latency(us)");
+                            fprintf(stdout, "%*s\n", 12, "Iterations");
+                        }
+
+                        else {
+                            fprintf(stdout, "\n");
+                        }
+
+                        fflush(stdout);
                 }
-
-                else {
-                    fprintf(stdout, "# Avg Latency(us)");
-                }
-
-                if (full) {
-                    fprintf(stdout, "%*s", FIELD_WIDTH, "Min Latency(us)");
-                    fprintf(stdout, "%*s", FIELD_WIDTH, "Max Latency(us)");
-                    fprintf(stdout, "%*s\n", 12, "Iterations");
-                }
-
-                else {
-                    fprintf(stdout, "\n");
-                }
-
-                fflush(stdout);
             }
             break;
         default:
@@ -610,6 +617,7 @@ int process_options(int argc, char *argv[])
     omb_process_long_options(long_options, options.optstring);
     /* Set default options*/
     options.accel = NONE;
+    options.alloc = PINNED;
     options.show_size = 1;
     options.show_full = 0;
     options.num_probes = 0;
@@ -819,6 +827,20 @@ int process_options(int argc, char *argv[])
                 break;
             case 'p':
                 options.pairs = atoi(optarg);
+                break;
+            case 'A':
+                if (0 == strncasecmp(optarg, "device", 6)) {
+                    if (accel_enabled) {
+                        options.alloc = DEVICE;
+                    } else {
+                        bad_usage.message = "Benchmark Does Not Support "
+                                            "Accelerator Allocations";
+                        bad_usage.optarg = optarg;
+                        return PO_BAD_USAGE;
+                    }
+                } else if (0 == strncasecmp(optarg, "pinned", 6)) {
+                    options.alloc = PINNED;
+                }
                 break;
             case 'a':
                 if (set_device_array_size(atoi(optarg))) {

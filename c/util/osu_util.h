@@ -228,6 +228,8 @@ enum po_ret_type {
 
 enum accel_type { NONE, CUDA, OPENACC, MANAGED, ROCM, SYCL };
 
+enum alloc_type { DEVICE, PINNED };
+
 enum target_type { CPU, GPU, BOTH };
 
 enum benchmark_type {
@@ -334,6 +336,7 @@ enum omb_dtypes_t { OMB_DTYPE_NULL, OMB_CHAR, OMB_INT, OMB_FLOAT, OMB_DOUBLE };
 
 struct options_t {
     enum accel_type accel;
+    enum alloc_type alloc;
     enum target_type target;
     int show_size;
     int show_full;

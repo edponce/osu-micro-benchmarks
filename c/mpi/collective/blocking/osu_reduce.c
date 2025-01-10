@@ -93,8 +93,7 @@ int main(int argc, char *argv[])
     }
     omb_buffer_sizes.recvbuf_size = bufsize;
     set_buffer(recvbuf, options.accel, 1, bufsize);
-    if (allocate_memory_coll((void **)&recvbuf_warmup, bufsize,
-                             options.accel)) {
+    if (allocate_memory_coll((void **)&recvbuf_warmup, bufsize, options.accel)) {
         fprintf(stderr, "Could Not Allocate Memory [rank %d]\n", rank);
         MPI_CHECK(MPI_Abort(omb_comm, EXIT_FAILURE));
     }
