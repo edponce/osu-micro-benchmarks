@@ -406,12 +406,12 @@ void print_header_one_sided(int rank, enum WINDOW win, enum SYNC sync,
                            -1 != options.omb_stat_percentiles[itr]) {
                         if (BW == options.subtype) {
                             fprintf(stdout, "%*sP%d Tail BW(MB/s)",
-                                    FIELD_WIDTH - strlen("Px Tail BW(MB/s)") -
+                                    FIELD_WIDTH - (int)strlen("Px Tail BW(MB/s)") -
                                         (options.omb_stat_percentiles[itr] > 9),
                                     "", options.omb_stat_percentiles[itr]);
                         } else {
                             fprintf(stdout, "%*sP%d Tail Lat(us)",
-                                    FIELD_WIDTH - strlen("Px Tail Lat(us)") -
+                                    FIELD_WIDTH - (int)strlen("Px Tail Lat(us)") -
                                         (options.omb_stat_percentiles[itr] > 9),
                                     "", options.omb_stat_percentiles[itr]);
                         }
@@ -527,7 +527,7 @@ void print_only_header_nbc(int rank)
         while (itr < OMB_STAT_MAX_NUM &&
                -1 != options.omb_stat_percentiles[itr]) {
             fprintf(stdout, "%*sP%d Tail Lat(us)",
-                    FIELD_WIDTH - strlen("Px Tail Lat(us)") -
+                    FIELD_WIDTH - (int)strlen("Px Tail Lat(us)") -
                         (options.omb_stat_percentiles[itr] > 9),
                     "", options.omb_stat_percentiles[itr]);
             itr++;
@@ -637,12 +637,12 @@ void print_only_header(int rank)
                -1 != options.omb_stat_percentiles[itr]) {
             if (BW == options.subtype) {
                 fprintf(stdout, "%*sP%d Tail BW(MB/s)",
-                        FIELD_WIDTH - strlen("Px Tail BW(MB/s)") -
+                        FIELD_WIDTH - (int)strlen("Px Tail BW(MB/s)") -
                             (options.omb_stat_percentiles[itr] > 9),
                         "", options.omb_stat_percentiles[itr]);
             } else {
                 fprintf(stdout, "%*sP%d Tail Lat(us)",
-                        FIELD_WIDTH - strlen("Px Tail Lat(us)") -
+                        FIELD_WIDTH - (int)strlen("Px Tail Lat(us)") -
                             (options.omb_stat_percentiles[itr] > 9),
                         "", options.omb_stat_percentiles[itr]);
             }
@@ -1766,7 +1766,7 @@ uint8_t validate_data(void *r_buf, size_t size, int num_procs,
             if (dtype == MPI_FLOAT) {
                 for (i = 0; i < num_elements; i++) {
                     j = (i % 100);
-                    if (abs(((float *)temp_r_buf)[i] -
+                    if (fabs(((float *)temp_r_buf)[i] -
                             ((float *)expected_buffer)[i]) > ERROR_DELTA) {
                         error = 1;
                         break;
@@ -2234,7 +2234,7 @@ int validate_reduction(void *buffer, size_t size, int iter, int num_procs,
     if (dtype == MPI_FLOAT) {
         for (i = 0; i < num_elements; i++) {
             j = (i % 100);
-            if (abs(((float *)temp_buffer)[i] - ((float *)expected_buffer)[i]) >
+            if (fabs(((float *)temp_buffer)[i] - ((float *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 errors = 1;
                 break;
@@ -2243,7 +2243,7 @@ int validate_reduction(void *buffer, size_t size, int iter, int num_procs,
     } else if (dtype == MPI_DOUBLE) {
         for (i = 0; i < num_elements; i++) {
             j = (i % 100);
-            if (abs(((double *)temp_buffer)[i] - ((double *)expected_buffer)[i]) >
+            if (fabs(((double *)temp_buffer)[i] - ((double *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 errors = 1;
                 break;
@@ -2311,7 +2311,7 @@ int validate_collective(void *buffer, size_t size, int value1, int value2,
     if (dtype == MPI_FLOAT) {
         for (i = 0; i < num_elements; i++) {
             j = (i % 100);
-            if (abs(((float *)temp_buffer)[i] - ((float *)expected_buffer)[i]) >
+            if (fabs(((float *)temp_buffer)[i] - ((float *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 errors = 1;
                 break;
@@ -2320,7 +2320,7 @@ int validate_collective(void *buffer, size_t size, int value1, int value2,
     } else if (dtype == MPI_DOUBLE) {
         for (i = 0; i < num_elements; i++) {
             j = (i % 100);
-            if (abs(((double *)temp_buffer)[i] - ((double *)expected_buffer)[i]) >
+            if (fabs(((double *)temp_buffer)[i] - ((double *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 errors = 1;
                 break;
@@ -2359,7 +2359,7 @@ void validation_log(void *buffer, void *expected_buffer, size_t size,
             rank);
     log_file_fp = fopen(log_file_loc, "a");
     OMB_CHECK_NULL_AND_EXIT(log_file_loc, "Unable to open file.");
-    fprintf(log_file_fp, "Size: %d, Iteration:%d, ", size, itr);
+    fprintf(log_file_fp, "Size: %zu, Iteration:%d, ", size, itr);
     if (MPI_DOUBLE == dtype) {
         fprintf(log_file_fp, "Datatype: MPI_DOUBLE\n");
     } else if (MPI_FLOAT == dtype) {
@@ -2376,7 +2376,7 @@ void validation_log(void *buffer, void *expected_buffer, size_t size,
 
     if (dtype == MPI_DOUBLE) {
         for (i = 0; i < num_elements; i++) {
-            if (abs(((double *)buffer)[i] - ((double *)expected_buffer)[i]) >
+            if (fabs(((double *)buffer)[i] - ((double *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 fprintf(log_file_fp, "%-*d%*f%*f\n", 10, i, FIELD_WIDTH,
                         ((double *)expected_buffer)[i], FIELD_WIDTH,
@@ -2385,7 +2385,7 @@ void validation_log(void *buffer, void *expected_buffer, size_t size,
         }
     } else if (dtype == MPI_FLOAT) {
         for (i = 0; i < num_elements; i++) {
-            if (abs(((float *)buffer)[i] - ((float *)expected_buffer)[i]) >
+            if (fabs(((float *)buffer)[i] - ((float *)expected_buffer)[i]) >
                 ERROR_DELTA) {
                 fprintf(log_file_fp, "%-*d%*f%*f\n", 10, i, FIELD_WIDTH,
                         ((float *)expected_buffer)[i], FIELD_WIDTH,
@@ -2611,16 +2611,26 @@ int allocate_memory_pt2pt_mul(char **sbuf, char **rbuf, int rank, int pairs)
                 return 1;
             }
         } else {
-            if (posix_memalign((void **)sbuf, align_size,
-                               options.max_message_size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
-            }
+            switch (options.alloc) {
+                case PINNED:
+#ifdef _ENABLE_ROCM_
+                    // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                    ROCM_CHECK(hipHostMalloc((void **)sbuf, options.max_message_size, hipDeviceScheduleSpin));
+                    ROCM_CHECK(hipHostMalloc((void **)rbuf, options.max_message_size, hipDeviceScheduleSpin));
+                    break;
+#endif
+                default:
+                    if (posix_memalign((void **)sbuf, align_size,
+                                    options.max_message_size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
 
-            if (posix_memalign((void **)rbuf, align_size,
-                               options.max_message_size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
+                    if (posix_memalign((void **)rbuf, align_size,
+                                    options.max_message_size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
             }
 
             memset(*sbuf, 0, options.max_message_size);
@@ -2648,17 +2658,28 @@ int allocate_memory_pt2pt_mul(char **sbuf, char **rbuf, int rank, int pairs)
                 return 1;
             }
         } else {
-            if (posix_memalign((void **)sbuf, align_size,
-                               options.max_message_size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
+            switch (options.alloc) {
+                case PINNED:
+#ifdef _ENABLE_ROCM_
+                    // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                    ROCM_CHECK(hipHostMalloc((void **)sbuf, options.max_message_size, hipDeviceScheduleSpin));
+                    ROCM_CHECK(hipHostMalloc((void **)rbuf, options.max_message_size, hipDeviceScheduleSpin));
+                    break;
+#endif
+                default:
+                    if (posix_memalign((void **)sbuf, align_size,
+                                    options.max_message_size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
+
+                    if (posix_memalign((void **)rbuf, align_size,
+                                    options.max_message_size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
             }
 
-            if (posix_memalign((void **)rbuf, align_size,
-                               options.max_message_size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
-            }
             memset(*sbuf, 0, options.max_message_size);
             memset(*rbuf, 0, options.max_message_size);
         }
@@ -2701,14 +2722,24 @@ int allocate_memory_pt2pt_mul_size(char **sbuf, char **rbuf, int rank,
                 return 1;
             }
         } else {
-            if (posix_memalign((void **)sbuf, align_size, size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
-            }
+            switch (options.alloc) {
+                case PINNED:
+#ifdef _ENABLE_ROCM_
+                    // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                    ROCM_CHECK(hipHostMalloc((void **)sbuf, size, hipDeviceScheduleSpin));
+                    ROCM_CHECK(hipHostMalloc((void **)rbuf, size, hipDeviceScheduleSpin));
+                    break;
+#endif
+                default:
+                    if (posix_memalign((void **)sbuf, align_size, size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
 
-            if (posix_memalign((void **)rbuf, align_size, size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
+                    if (posix_memalign((void **)rbuf, align_size, size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
             }
 
             memset(*sbuf, 0, size);
@@ -2736,15 +2767,26 @@ int allocate_memory_pt2pt_mul_size(char **sbuf, char **rbuf, int rank,
                 return 1;
             }
         } else {
-            if (posix_memalign((void **)sbuf, align_size, size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
+            switch (options.alloc) {
+                case PINNED:
+#ifdef _ENABLE_ROCM_
+                    // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                    ROCM_CHECK(hipHostMalloc((void **)sbuf, size, hipDeviceScheduleSpin));
+                    ROCM_CHECK(hipHostMalloc((void **)rbuf, size, hipDeviceScheduleSpin));
+                    break;
+#endif
+                default:
+                    if (posix_memalign((void **)sbuf, align_size, size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
+
+                    if (posix_memalign((void **)rbuf, align_size, size)) {
+                        fprintf(stderr, "Error allocating host memory\n");
+                        return 1;
+                    }
             }
 
-            if (posix_memalign((void **)rbuf, align_size, size)) {
-                fprintf(stderr, "Error allocating host memory\n");
-                return 1;
-            }
             memset(*sbuf, 0, size);
             memset(*rbuf, 0, size);
         }
@@ -2780,16 +2822,26 @@ int allocate_memory_pt2pt(char **sbuf, char **rbuf, int rank)
                     return 1;
                 }
             } else {
-                if (posix_memalign((void **)sbuf, align_size,
-                                   options.max_message_size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
-                }
+                switch (options.alloc) {
+                    case PINNED:
+#ifdef _ENABLE_ROCM_
+                        // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                        ROCM_CHECK(hipHostMalloc((void **)sbuf, options.max_message_size, hipDeviceScheduleSpin));
+                        ROCM_CHECK(hipHostMalloc((void **)rbuf, options.max_message_size, hipDeviceScheduleSpin));
+                        break;
+#endif
+                    default:
+                        if (posix_memalign((void **)sbuf, align_size,
+                                        options.max_message_size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
 
-                if (posix_memalign((void **)rbuf, align_size,
-                                   options.max_message_size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
+                        if (posix_memalign((void **)rbuf, align_size,
+                                        options.max_message_size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
                 }
             }
             break;
@@ -2815,16 +2867,26 @@ int allocate_memory_pt2pt(char **sbuf, char **rbuf, int rank)
                     return 1;
                 }
             } else {
-                if (posix_memalign((void **)sbuf, align_size,
-                                   options.max_message_size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
-                }
+                switch (options.alloc) {
+                    case PINNED:
+#ifdef _ENABLE_ROCM_
+                        // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                        ROCM_CHECK(hipHostMalloc((void **)sbuf, options.max_message_size, hipDeviceScheduleSpin));
+                        ROCM_CHECK(hipHostMalloc((void **)rbuf, options.max_message_size, hipDeviceScheduleSpin));
+                        break;
+#endif
+                    default:
+                        if (posix_memalign((void **)sbuf, align_size,
+                                        options.max_message_size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
 
-                if (posix_memalign((void **)rbuf, align_size,
-                                   options.max_message_size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
+                        if (posix_memalign((void **)rbuf, align_size,
+                                        options.max_message_size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
                 }
             }
             break;
@@ -2868,14 +2930,24 @@ int allocate_memory_pt2pt_size(char **sbuf, char **rbuf, int rank,
                     return 1;
                 }
             } else {
-                if (posix_memalign((void **)sbuf, align_size, size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
-                }
+                switch (options.alloc) {
+                    case PINNED:
+#ifdef _ENABLE_ROCM_
+                        // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                        ROCM_CHECK(hipHostMalloc((void **)sbuf, size, hipDeviceScheduleSpin));
+                        ROCM_CHECK(hipHostMalloc((void **)rbuf, size, hipDeviceScheduleSpin));
+                        break;
+#endif
+                    default:
+                        if (posix_memalign((void **)sbuf, align_size, size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
 
-                if (posix_memalign((void **)rbuf, align_size, size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
+                        if (posix_memalign((void **)rbuf, align_size, size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
                 }
             }
             break;
@@ -2901,14 +2973,24 @@ int allocate_memory_pt2pt_size(char **sbuf, char **rbuf, int rank,
                     return 1;
                 }
             } else {
-                if (posix_memalign((void **)sbuf, align_size, size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
-                }
+                switch (options.alloc) {
+                    case PINNED:
+#ifdef _ENABLE_ROCM_
+                        // (default) hipDeviceScheduleSpin, hipDeviceScheduleYield, hipDeviceScheduleAuto
+                        ROCM_CHECK(hipHostMalloc((void **)sbuf, size, hipDeviceScheduleSpin));
+                        ROCM_CHECK(hipHostMalloc((void **)rbuf, size, hipDeviceScheduleSpin));
+                        break;
+#endif
+                    default:
+                        if (posix_memalign((void **)sbuf, align_size, size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
 
-                if (posix_memalign((void **)rbuf, align_size, size)) {
-                    fprintf(stderr, "Error allocating host memory\n");
-                    return 1;
+                        if (posix_memalign((void **)rbuf, align_size, size)) {
+                            fprintf(stderr, "Error allocating host memory\n");
+                            return 1;
+                        }
                 }
             }
             break;
@@ -3307,11 +3389,24 @@ void free_memory(void *sbuf, void *rbuf, int rank)
                 free_device_buffer(sbuf);
                 free_device_buffer(rbuf);
             } else {
-                if (sbuf) {
-                    free(sbuf);
-                }
-                if (rbuf) {
-                    free(rbuf);
+                switch (options.alloc) {
+                    case PINNED:
+#ifdef _ENABLE_ROCM_
+                        if (sbuf) {
+                            ROCM_CHECK(hipFreeHost(sbuf));
+                        }
+                        if (rbuf) {
+                            ROCM_CHECK(hipFreeHost(rbuf));
+                        }
+                        break;
+#endif
+                    default:
+                        if (sbuf) {
+                            free(sbuf);
+                        }
+                        if (rbuf) {
+                            free(rbuf);
+                        }
                 }
             }
             break;
@@ -3320,11 +3415,24 @@ void free_memory(void *sbuf, void *rbuf, int rank)
                 free_device_buffer(sbuf);
                 free_device_buffer(rbuf);
             } else {
-                if (sbuf) {
-                    free(sbuf);
-                }
-                if (rbuf) {
-                    free(rbuf);
+                switch (options.alloc) {
+                    case PINNED:
+#ifdef _ENABLE_ROCM_
+                        if (sbuf) {
+                            ROCM_CHECK(hipFreeHost(sbuf));
+                        }
+                        if (rbuf) {
+                            ROCM_CHECK(hipFreeHost(rbuf));
+                        }
+                        break;
+#endif
+                    default:
+                        if (sbuf) {
+                            free(sbuf);
+                        }
+                        if (rbuf) {
+                            free(rbuf);
+                        }
                 }
             }
             break;
@@ -3338,16 +3446,34 @@ void free_memory_pt2pt_mul(void *sbuf, void *rbuf, int rank, int pairs)
             free_device_buffer(sbuf);
             free_device_buffer(rbuf);
         } else {
-            free(sbuf);
-            free(rbuf);
+            switch (options.alloc) {
+                case PINNED:
+#ifdef _ENABLE_ROCM_
+                    ROCM_CHECK(hipFreeHost(sbuf));
+                    ROCM_CHECK(hipFreeHost(rbuf));
+                    break;
+#endif
+                default:
+                    free(sbuf);
+                    free(rbuf);
+            }
         }
     } else {
         if ('D' == options.dst || 'M' == options.dst) {
             free_device_buffer(sbuf);
             free_device_buffer(rbuf);
         } else {
-            free(sbuf);
-            free(rbuf);
+            switch (options.alloc) {
+                case PINNED:
+#ifdef _ENABLE_ROCM_
+                    ROCM_CHECK(hipFreeHost(sbuf));
+                    ROCM_CHECK(hipFreeHost(rbuf));
+                    break;
+#endif
+                default:
+                    free(sbuf);
+                    free(rbuf);
+            }
         }
     }
 }

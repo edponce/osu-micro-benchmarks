@@ -78,7 +78,7 @@ void print_header(int rank, int full)
                                     fprintf(
                                         stdout, "%*sP%d Tail BW(MB/s)",
                                         FIELD_WIDTH -
-                                            strlen("Px Tail BW(MB/s)") -
+                                            (int)strlen("Px Tail BW(MB/s)") -
                                             (options.omb_stat_percentiles[itr] >
                                              9),
                                         "", options.omb_stat_percentiles[itr]);
@@ -86,7 +86,7 @@ void print_header(int rank, int full)
                                     fprintf(
                                         stdout, "%*sP%d Tail Lat(us)",
                                         FIELD_WIDTH -
-                                            strlen("Px Tail Lat(us)") -
+                                            (int)strlen("Px Tail Lat(us)") -
                                             (options.omb_stat_percentiles[itr] >
                                              9),
                                         "", options.omb_stat_percentiles[itr]);

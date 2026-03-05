@@ -93,10 +93,10 @@
 #define OMBOP__COLLECTIVE__LAT               "+:hvfm:i:x:a:z::"
 #define OMBOP__ACCEL__COLLECTIVE__LAT        "+:d:hvfm:i:x:a:z::"
 #define OMBOP__COLLECTIVE__ALL_REDUCE        "+:hvfm:i:x:a:c::u:G:P:T:Ilz::"
-#define OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "+:d:hvfm:i:x:a:c::u:G:T:Ilz::"
+#define OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "+:d:hvfm:i:x:A:a:c::u:G:T:Ilz::"
 #define OMBOP__COLLECTIVE__REDUCE            OMBOP__COLLECTIVE__ALL_REDUCE "k:"
 #define OMBOP__ACCEL__COLLECTIVE__REDUCE                                       \
-    OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "A:k:"
+    OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE "k:"
 #define OMBOP__COLLECTIVE__REDUCE_SCATTER OMBOP__COLLECTIVE__ALL_REDUCE
 #define OMBOP__ACCEL__COLLECTIVE__REDUCE_SCATTER                               \
     OMBOP__ACCEL__COLLECTIVE__ALL_REDUCE

@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
                            -1 != options.omb_stat_percentiles[itr]) {
                         if (BW == options.subtype) {
                             fprintf(stdout, "%*sP%d Tail BW(MB/s)",
-                                    FIELD_WIDTH - strlen("Px Tail BW(MB/s)") -
+                                    FIELD_WIDTH - (int)strlen("Px Tail BW(MB/s)") -
                                         (options.omb_stat_percentiles[itr] > 9),
                                     "", options.omb_stat_percentiles[itr]);
                         }
