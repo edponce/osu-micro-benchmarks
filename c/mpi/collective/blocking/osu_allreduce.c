@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
             }
             omb_papi_stop_and_print(&papi_eventset, size);
             latency = (double)(timer * 1e6) / options.iterations;
+            fprintf(stderr, "PE %d, Size: %d, Latency: %f\n", rank, size, latency);
 
             MPI_CHECK(MPI_Reduce(&latency, &min_time, 1, MPI_DOUBLE, MPI_MIN, 0,
                                  omb_comm));
